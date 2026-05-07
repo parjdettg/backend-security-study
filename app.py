@@ -1,22 +1,26 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request # request를 추가로 가져와야 해!
 
 app = Flask(__name__)
 
-# 정문(Root) 경로
 @app.route('/')
 def home():
-    return "<h1>Backend Master Server Online</h1><p>Security Check: Passed</p>"
+    return "<h1>3장: 데이터 통신 입문</h1>"
 
-# 데이터 통신 전용 통로 (API)
-@app.route('/api/status')
-def get_status():
-    data = {
-        "status": "running",
-        "instructor": "Gemini",
-        "message": "천만 원짜리 수업에 오신 걸 환영합니다."
-    }
-    return jsonify(data)
+# [핵심] 데이터를 받아서 처리하는 통로 (POST 방식)
+@app.route('/api/greet', methods=['POST'])
+def greet_user():
+    # 사용자가 보낸 JSON 데이터를 읽어와
+    user_data = request.get_json()
+    
+    # [보안 포인트] 데이터가 비어있으면 거절한다! (Validation)
+    if not user_data or 'name' not in user_data:
+        return jsonify({"error": "이름이 없으면 입장을 거부합니다."}), 400
+    
+    name = user_data['name']
+    return jsonify({
+        "message": f"안녕하세요, {name}님! 당신은 백엔드 마스터 후보입니다.",
+        "status": "success"
+    })
 
 if __name__ == '__main__':
-    # 5000번 포트로 서버 가동!
     app.run(debug=True, port=5000)
